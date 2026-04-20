@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SentimentAI</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: #0d0b14;
+      color: #efeefe;
+      font-family: Arial, sans-serif;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 700px;
+      background: #171422;
+      border: 1px solid #2d2743;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 42px;
+      color: #9f8cff;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: #a8a0c9;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #bbb2de;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 170px;
+      border-radius: 16px;
+      border: 2px solid #3a3157;
+      background: #110f1a;
+      color: #f3f1ff;
+      padding: 18px;
+      font-size: 24px;
+      line-height: 1.5;
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #6f5cff;
+    }
+
+    .count {
+      margin-top: 10px;
+      text-align: right;
+      color: #a8a0c9;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      border: 0;
+      border-radius: 18px;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: 700;
+      background: #7d67f8;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #6d57e8;
+    }
+
+    .error {
+      display: none;
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 85, 85, 0.1);
+      border: 1px solid rgba(255, 85, 85, 0.35);
+      color: #ff8d8d;
+    }
+
+    .result {
+      display: none;
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 16px;
+      background: #120f1d;
+      border: 1px solid #31294a;
+    }
+
+    .result h2 {
+      margin: 0 0 12px;
+      font-size: 26px;
+    }
+
+    .small {
+      color: #bbb2de;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>SentimentAI</h1>
+    <p>Type some text and click the button to analyse sentiment.</p>
+
+    <label for="textInput">Enter text</label>
+    <textarea id="textInput" maxlength="512" placeholder="Example: I liked bacon sandwich today at asda"></textarea>
+    <div class="count" id="charCount">0 / 512</div>
+
+    <button onclick="analyse()">Analyse Sentiment</button>
+
+    <div class="error" id="errorBox"></div>
+
+    <div class="result" id="resultBox">
+      <h2 id="sentimentText"></h2>
+      <div class="small" id="confidenceText"></div>
+      <div class="small" id="previewText"></div>
+    </div>
+  </div>
+
+  <script>
+    const textInput = document.getElementById("textInput");
+    const charCount = document.getElementById("charCount");
+    const errorBox = document.getElementById("errorBox");
+    const resultBox = document.getElementById("resultBox");
+
+    textInput.addEventListener("input", () => {
+      charCount.textContent = `${textInput.value.length} / 512`;
+    });
+
+    async function analyse() {
+      errorBox.style.display = "none";
+      resultBox.style.display = "none";
+
+      const text = textInput.value.trim();
+      if (!text) {
+        errorBox.textContent = "Please enter some text first.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      try {
+        const response = await fetch("/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.details || data.error || "Something went wrong");
+        }
+
+        document.getElementById("sentimentText").textContent = `Sentiment: ${data.sentiment}`;
+        document.getElementById("confidenceText").textContent = `Confidence: ${data.confidence}%`;
+        document.getElementById("previewText").textContent = `Preview: ${data.text_preview}`;
+        resultBox.style.display = "block";
+      } catch (error) {
+        errorBox.textContent = `Error: ${error.message}`;
+        errorBox.style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
