@@ -1,4 +1,4 @@
-# SentimentAI – Flask Sentiment Analysis Ap
+# SentimentAI – Flask Sentiment Analysis App
 
 A simple web-based sentiment analysis tool that classifies user input as Positive, Negative, or Neutral using NLP techniques.
 
