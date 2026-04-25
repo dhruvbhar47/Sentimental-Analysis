@@ -71,7 +71,6 @@ def analyze():
     sentiment_map = {
         "POSITIVE": "Positive",
         "NEGATIVE": "Negative",
-        "NEUTRAL": "Neutral",
     }
 
     return jsonify(
